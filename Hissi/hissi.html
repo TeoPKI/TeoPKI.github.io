@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<head>
+    <style>
+
+        #content{
+            border-style: solid;
+            padding: 15px;
+            width: 220px;
+            text-align: center;
+            background-color: rgb(176, 189, 202);
+        }
+
+        #floor-content{
+            border-style: solid;     
+            padding: 0px;
+            margin-left: 60px;
+            margin-right: 60px;
+            background-color: rgb(196, 196, 196);
+        }
+
+        #console-content{
+            border-style: solid;
+            background-color: rgb(196, 196, 196);
+            text-transform: uppercase;
+        }
+
+        ul{
+            list-style-type: none;
+            column-gap : 0px;
+            columns: 2;
+        }
+
+        
+        #ordered-floor-display{
+            margin-top: 5px;
+            background-color: black;
+            color: lime;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            margin-left: 5px;
+            margin-right: 5px;
+            border-style: solid;
+            border-color: rgb(238, 238, 238);
+        }
+
+        input[type="button"]{
+            border-radius: 50%;
+            width: 35px;
+            height: 35px;
+            margin-top: 5px;
+            margin-bottom: 5px;
+            font-weight: bold;
+            border-style: solid;
+            border-color: red;
+            background-color: black;
+            color: white;
+        }
+
+
+
+    </style>
+
+</head>
+<body>
+    <div id="content">
+        <h2>Elevator</h2>
+        <div id="console-content">
+    
+            <div id="ordered-floor-display">
+                <p id="ordered-floor-num">1</p>
+            </div>
+            <ul id="floor-content">
+                <li>
+                <input type="button" id="kerros1" name="kerros" class="floor" value="1" onclick="request(0)">
+                </li>
+                <li>
+                <input type="button" id="kerros2" name="kerros" class="floor" value="2" onclick="request(1)">
+                </li>
+                <li>
+                <input type="button" id="kerros3" name="kerros" class="floor" value="3" onclick="request(2)">
+                </li>
+                <li>
+                <input type="button" id="kerros4" name="kerros" class="floor" value="4" onclick="request(3)">
+                </li>
+                <li>
+                <input type="button" id="kerros5" name="kerros" class="floor" value="5" onclick="request(4)">
+                </li>
+                <li>
+                <input type="button" id="kerros6" name="kerros" class="floor" value="6"  onclick="request(5)">
+                </li>
+                <li>
+                <input type="button" id="kerros7" name="kerros" class="floor" value="7" onclick="request(6)">
+                </li>
+                <li>
+                <input type="button" id="kerros8" name="kerros" class="floor" value="8" onclick="request(7)">
+                </li> 
+            </ul>
+        </div>
+        <script>
+            var currentFloor = 1;
+
+            var inputs = document.getElementsByClassName('floor');
+            inputs[0].style.borderColor = "yellow";
+
+            // tick interval
+            var moveInterval = 1000;
+
+            // move sequence interval ID
+            var id;
+            
+            const states = {"IDLE":1, "OPENING":2, "CLOSING":3, "MOVING":4};
+            Object.freeze(states);
+
+            var currentState = states.IDLE;
+
+            var requestedFloors = [];
+
+            const direction = {"UP":1, "DOWN":2};
+            var currentDirection;
+            
+            function request(destination){
+                if(!requestedFloors.includes(destination + 1)){
+                    if(destination + 1 != currentFloor){
+                        requestedFloors.push(destination + 1);
+                        inputs[destination].style.borderColor = "lime";
+
+                        if(currentState == states.IDLE){
+                            if(requestedFloors[0] != currentFloor){
+                                currentState = states.CLOSING;
+                            }else{
+                                currentState = states.OPENING;
+                            }
+
+                            if(requestedFloors[0] > currentFloor){
+                                currentDirection = direction.UP;
+                            }else{
+                                currentDirection = direction.DOWN;
+                            }
+
+                            id = setInterval(updateElevator, moveInterval);
+                        }           
+                    }
+                }
+            }
+
+            function updateElevator(){
+                switch(currentState){
+                    case states.IDLE:
+                    document.getElementById("ordered-floor-num").innerHTML = currentFloor;
+                        clearInterval(id);
+                    break;
+                    case states.OPENING:
+                        document.getElementById("ordered-floor-num").innerHTML = "DOOR OPENS";
+                        if(requestedFloors.length > 0){
+                            currentState = states.CLOSING;
+                        }else{
+                            currentState = states.IDLE;
+                        }
+                    break;
+                    case states.CLOSING:
+                        document.getElementById("ordered-floor-num").innerHTML = "DOOR CLOSES";
+                        if(requestedFloors.length == 0){
+                            currentState = states.IDLE;
+                        }else{
+                            currentState = states.MOVING;
+                        }
+                    break;
+                    case states.MOVING:
+
+                    if(requestedFloors.length > 0){
+                        inputs[currentFloor - 1].style.borderColor = "red";
+                        if(currentDirection == direction.UP){
+                            currentFloor++;
+                     
+                            if(currentFloor >= Math.max.apply(null, requestedFloors)){
+                                currentDirection = direction.DOWN;
+                            }
+                        }else{
+                            currentFloor--;
+
+                            if(currentFloor <= Math.min.apply(null, requestedFloors)){
+                                currentDirection = direction.UP;
+                            }
+                        }
+                    }
+                        document.getElementById("ordered-floor-num").innerHTML = currentFloor;
+                        inputs[currentFloor - 1].style.borderColor = "yellow";
+                        
+                        // poista nykyinen kerros tilatuista
+                        if(requestedFloors.includes(currentFloor)){
+                            let index = requestedFloors.indexOf(currentFloor);
+                            requestedFloors.splice(index,1);
+                            currentState = states.OPENING;
+                        }
+
+        
+                    break;
+                }
+            }
+        </script>
+
+    </div>
+</body>
+</html>
