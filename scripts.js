@@ -8,4 +8,10 @@ function openTab(tabId) {
     }
 
     document.getElementById(tabId).style.display = "block";
+    
+    
+    // refresh iframes...
+    document.querySelectorAll('iframe').forEach((iframe) => {
+        iframe.src = iframe.src
+    });
 }
